@@ -1,5 +1,6 @@
 ﻿using ChatRoom.Contracts.Model;
 using ChatRoom.Services.Service;
+using Server.Contracts.Service;
 using Server.Services.Service;
 using System;
 using System.Net.Sockets;
@@ -9,36 +10,60 @@ namespace Server.Messaging
 {
     public class Program
     {
-        private static Room Room = new Room("Public_ChatRoom");
+        public const int Port = 6009;
+        public const string RoomName = "Public_ChatRoom";
+
+        private static Room Room = new Room(RoomName);
         public static void Main(string[] args)
         {
-            TcpSocketServer ss = new TcpSocketServer(new ChatRoomService(), 6009);
-            TcpListener tcpListener = ss.CreateListener(6009);
-            tcpListener.Start();
-            while (true)
+            Start();
+        }
+
+        private static void Start()
+        {
+            try
             {
-                TcpClient client = ss.WaitForConnection(tcpListener);
-                Task.Run(() => ProcessMessages(ss, client));
+                ITcpSocketServer tcpSocketServer = new TcpSocketServer(new ChatRoomService(), Port);
+                TcpListener tcpListener = tcpSocketServer.StartListening();
+                while (true)
+                {
+                    TcpClient client = tcpSocketServer.WaitForConnection(tcpListener);
+                    Task.Run(() => Process(tcpSocketServer, client));
+                }
+            }
+            catch (Exception ex)
+            {
+                PrintException(ex);
+                Console.ReadKey();
             }
         }
 
-        private static void ProcessMessages(TcpSocketServer ss, TcpClient client)
+        private static void Process(ITcpSocketServer tcpSocketServer, TcpClient client)
         {
             while (true)
             {
                 Console.WriteLine("Client Accepted");
-                try
+                if (!IsClientConnected(client))
+                    break;
+
+                NetworkStream stream = tcpSocketServer.CreateNetworkStream(client);
+                tcpSocketServer.ProcessRequest(client, stream, Room);
+            }
+        }
+
+        private static bool IsClientConnected(TcpClient client)
+        {
+            return client != null && client.Connected;
+        }
+
+        private static void PrintException(Exception ex)
+        {
+            if (ex != null)
+            {
+                Console.WriteLine($"Exception->{ex.Message}");
+                if (ex.InnerException != null)
                 {
-                    if (client == null || !client.Connected)
-                    {
-                        break;
-                    }
-                    NetworkStream stream = ss.CreateNetworkStream(client);
-                    ss.ReceiveAndWriteMessage(client, stream, Room);
-                }
-                catch (Exception ex)
-                {
-                    continue;
+                    Console.WriteLine($"InnerException-> {ex.InnerException.Message}");
                 }
             }
         }

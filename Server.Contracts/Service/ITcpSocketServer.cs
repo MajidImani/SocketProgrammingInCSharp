@@ -5,10 +5,10 @@ namespace Server.Contracts.Service
 {
     public interface ITcpSocketServer
     {
-        TcpListener CreateListener(int port);
+        TcpListener StartListening();
         TcpClient WaitForConnection(TcpListener listener);
         NetworkStream CreateNetworkStream(TcpClient client);
-        void ReceiveAndWriteMessage(TcpClient client, NetworkStream stream, Room room);
+        void ProcessRequest(TcpClient client, NetworkStream stream, Room room);
     }
 
 }

@@ -58,6 +58,10 @@
       <Project>{B3F8B292-982E-46D4-AEC1-6DC531D02384}</Project>
       <Name>ChatRoom.Services</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Server.Contracts\Server.Contracts.csproj">
+      <Project>{2AB4B7A3-79AD-4BB1-AA65-1BB8477C80FF}</Project>
+      <Name>Server.Contracts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Server.Services\Server.Services.csproj">
       <Project>{9459B6DE-2237-4A26-8B56-08FAB9E48DAE}</Project>
       <Name>Server.Services</Name>

@@ -9,19 +9,27 @@ using System.Text;
 
 namespace Server.Services.Service
 {
-    //پیاده سازی اینترفیس های لازم برای سرور
     public class TcpSocketServer : ITcpSocketServer
     {
         private readonly IChatRoomService _chatRoomService;
         public int Port { get; set; }
+
+        public TcpSocketServer(int port)
+        {
+            this.Port = port;
+        }
+
+        public TcpSocketServer()
+        {
+        }
+
         public TcpSocketServer(IChatRoomService chatRoomService, int port)
         {
             this.Port = port;
             _chatRoomService = chatRoomService;
         }
 
-        //اصلی ترین متد سمت سرور
-        public void ReceiveAndWriteMessage(TcpClient client, NetworkStream stream, Room room)
+        public void ProcessRequest(TcpClient client, NetworkStream stream, Room room)
         {
             try
             {
@@ -38,12 +46,9 @@ namespace Server.Services.Service
 
                 string request = Encoding.UTF8.GetString(buffer, 0, recv);
                 Console.WriteLine($"request received: {request}");
-                TcpClient recClient = null;
                 string response = "";
                 string sender = "";
 
-                //اگر پیام از نوع ملحق شدن بود
-                //در اینجا یوزر جوین می شود
                 if (request.Contains("join:"))
                 {
                     var splittedMessage = request.Split(':');
@@ -60,7 +65,6 @@ namespace Server.Services.Service
                     _chatRoomService.SendMessageToClient(client, response);
                     _chatRoomService.BroadcastMessage(sender, "Public_ChatRoom", response);
                 }
-                //در اینجا یوزر لفت داده است
                 else if (request.Contains("left:"))
                 {
                     var splittedMessage = request.Split(':');
@@ -69,7 +73,6 @@ namespace Server.Services.Service
                     _chatRoomService.LeftTheRoom(client, sender, room);
                     _chatRoomService.BroadcastMessage(sender, "Public_ChatRoom", response);
                 }
-                //در اینجا یوزر ارسال پیام انجام داده است
                 else
                 {
                     var splittedMessage = request.Split('|');
@@ -86,6 +89,7 @@ namespace Server.Services.Service
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Exception: {ex.ToString()}");
                 _chatRoomService.SendMessageToClient(client, $"Exception: {ex.ToString()}");
             }
         }
@@ -106,10 +110,12 @@ namespace Server.Services.Service
             return listener.AcceptTcpClient();
         }
 
-        public TcpListener CreateListener(int port)
+        public TcpListener StartListening()
         {
-            return new TcpListener(System.Net.IPAddress.Any, port);
+            TcpListener tcpListener = null;
+            tcpListener = new TcpListener(System.Net.IPAddress.Any, this.Port);
+            tcpListener.Start();
+            return tcpListener;
         }
-      
-        }
+    }
 }
