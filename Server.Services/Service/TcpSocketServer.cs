@@ -19,10 +19,6 @@ namespace Server.Services.Service
             this.Port = port;
         }
 
-        public TcpSocketServer()
-        {
-        }
-
         public TcpSocketServer(IChatRoomService chatRoomService, int port)
         {
             this.Port = port;
@@ -106,7 +102,7 @@ namespace Server.Services.Service
 
         public TcpClient WaitForConnection(TcpListener listener)
         {
-            Console.WriteLine("Waiting for a connection.");
+            Console.WriteLine("Wait for connection...");
             return listener.AcceptTcpClient();
         }
 

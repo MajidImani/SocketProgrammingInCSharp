@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.UI", "Client.UI\Clie
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerSocket.Tests", "ServerSocket.Test\ServerSocket.Tests.csproj", "{1663C1B3-CD0A-4894-B729-08975CD66129}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoom.Tests", "ChatRoom.Tests\ChatRoom.Tests.csproj", "{82570693-8141-44D6-8710-E5DDFFF764EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{1663C1B3-CD0A-4894-B729-08975CD66129}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1663C1B3-CD0A-4894-B729-08975CD66129}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1663C1B3-CD0A-4894-B729-08975CD66129}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82570693-8141-44D6-8710-E5DDFFF764EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82570693-8141-44D6-8710-E5DDFFF764EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82570693-8141-44D6-8710-E5DDFFF764EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82570693-8141-44D6-8710-E5DDFFF764EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +89,7 @@ Global
 		{B3F8B292-982E-46D4-AEC1-6DC531D02384} = {9699DFA7-0B6E-4E6C-95D8-76927E23CD7C}
 		{7688FC56-4D8A-488C-B292-43CA22A3C857} = {17D7B073-5D1C-4CE2-933C-2E2765D3140A}
 		{1663C1B3-CD0A-4894-B729-08975CD66129} = {80F0B062-D579-4E45-8ECD-8D18BAED71AA}
+		{82570693-8141-44D6-8710-E5DDFFF764EA} = {9699DFA7-0B6E-4E6C-95D8-76927E23CD7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E3F46011-D3E6-4E47-A37A-B57CA9895FD2}

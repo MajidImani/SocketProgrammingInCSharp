@@ -11,14 +11,11 @@ namespace ChatRoom.Services.Service
     {
         public void JoinToRoom(TcpClient client, string username, Room room)
         {
-            Chat.RoomUsers.Add(username);
-            Chat.TcpSocketClients.Add(client);
-            if (!Chat.Rooms.Any(r => r.Name.Equals(room.Name)))
-            {
-                Chat.Rooms.Add(room);
-            }
-            Chat.UserRooms.Add(username, room.Name);
-            Chat.UserSockets.Add(username, client);
+            Chat.AddNewRoom(room);
+            Chat.AddUserToRoom(username);
+            Chat.AddTcpClient(client);
+            Chat.AddUserRoomPair(username, room.Name);
+            Chat.AddUserSocketPair(username, client);
         }
 
         public void BroadcastMessage(string sender, string roomName, string message)
