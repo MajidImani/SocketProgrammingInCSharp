@@ -1,13 +1,16 @@
-﻿using Server.Contracts.Service;
+﻿using FluentAssertions;
+using Server.Contracts.Service;
 using Server.Services.Service;
 using System;
+using System.Net.Sockets;
 using Xunit;
 
 namespace ServerSocket.Test
 {
     public class TcpSocketServiceTests
     {
-        ITcpSocketServer _tcpSocketServer;
+        private ITcpSocketServer _tcpSocketServer;
+
 
         [Theory]
         [InlineData(6009)]
@@ -18,8 +21,8 @@ namespace ServerSocket.Test
         public void Start_Listening_Should_Start_New_Listener_When_Port_Is_Valid(int port)
         {
             _tcpSocketServer = new TcpSocketServer(port);
-            var tcpListener = _tcpSocketServer.StartListening();
-            Assert.True(tcpListener.Server.IsBound);
+            TcpListener tcpListener = _tcpSocketServer.StartListening();
+            tcpListener.Server.IsBound.Should().Be(true);
             tcpListener.Stop();
         }
 
@@ -29,7 +32,7 @@ namespace ServerSocket.Test
         public void Start_Listening_Should_Throw_Exception_When_Port_Is_InValid(int port)
         {
             _tcpSocketServer = new TcpSocketServer(port);
-            Assert.Throws<ArgumentOutOfRangeException>(() => _tcpSocketServer.StartListening());
+            _tcpSocketServer.Invoking(a => a.StartListening()).Should().Throw<ArgumentOutOfRangeException>();
         }
     }
 }
