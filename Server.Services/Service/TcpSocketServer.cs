@@ -29,56 +29,33 @@ namespace Server.Services.Service
         {
             try
             {
-                byte[] buffer = new byte[1024];
-                stream.Read(buffer, 0, buffer.Length);
-                int recv = 0;
-                foreach (byte b in buffer)
-                {
-                    if (b != 0)
-                    {
-                        recv++;
-                    }
-                }
-
-                string request = Encoding.UTF8.GetString(buffer, 0, recv);
+                string request = ParseStreamAndGetRequest(stream);
                 Console.WriteLine($"request received: {request}");
-                string response = "";
-                string sender = "";
+                string[] splittedMessage = GetSplittedMessageByRequest(request);
+                string sender = GetSenderByRequest(request, splittedMessage);
 
-                if (request.Contains("join:"))
+                if (IsJoinOrLeftRequest(request))
                 {
-                    var splittedMessage = request.Split(':');
-                    sender = splittedMessage[1];
-                    if (!_chatRoomService.IsDuplicateUser(sender))
+                    string response = "";
+                    if (IsJoinRequest(request))
                     {
-                        _chatRoomService.JoinToRoom(client, sender, room);
-                        response = $"{sender} join to room";
+                        response = GetJoinResponse(client, room, sender);
+                        _chatRoomService.SendMessageToClient(client, response);
                     }
                     else
                     {
-                        response = $"DuplicateUser";
+                        response = GetLeftResponse(sender);
+                        _chatRoomService.LeftTheRoom(client, sender, room);
                     }
-                    _chatRoomService.SendMessageToClient(client, response);
-                    _chatRoomService.BroadcastMessage(sender, "Public_ChatRoom", response);
-                }
-                else if (request.Contains("left:"))
-                {
-                    var splittedMessage = request.Split(':');
-                    sender = splittedMessage[1];
-                    response = $"{sender} left the room";
-                    _chatRoomService.LeftTheRoom(client, sender, room);
-                    _chatRoomService.BroadcastMessage(sender, "Public_ChatRoom", response);
+                    _chatRoomService.BroadcastMessage(sender, room.Name, response);
                 }
                 else
                 {
-                    var splittedMessage = request.Split('|');
                     var message = splittedMessage[0].Split(':')[1];
-                    sender = splittedMessage[1].Split(':')[1];
                     var receiver = splittedMessage[2].Split(':')[1];
-                    response = $"{sender}: {message}";
                     if (string.IsNullOrWhiteSpace(receiver))
                     {
-                        _chatRoomService.BroadcastMessage(sender, "Public_ChatRoom", response);
+                        _chatRoomService.BroadcastMessage(sender, room.Name, FormatMessageForSend(sender, message));
                     }
                 }
 
@@ -90,11 +67,28 @@ namespace Server.Services.Service
             }
         }
 
-        public void FlushStream(StreamWriter sw)
+
+        private static bool IsJoinRequest(string request)
         {
-            sw.Flush();
+            return request.Contains("join:");
         }
 
+        private static string ParseStreamAndGetRequest(NetworkStream stream)
+        {
+            byte[] buffer = new byte[1024];
+            stream.Read(buffer, 0, buffer.Length);
+            int recv = 0;
+            foreach (byte b in buffer)
+            {
+                if (b != 0)
+                {
+                    recv++;
+                }
+            }
+
+            string request = Encoding.UTF8.GetString(buffer, 0, recv);
+            return request;
+        }
         public NetworkStream CreateNetworkStream(TcpClient client)
         {
             return client.GetStream();
@@ -113,5 +107,64 @@ namespace Server.Services.Service
             tcpListener.Start();
             return tcpListener;
         }
+        private static string FormatMessageForSend(string sender, string message)
+        {
+            return $"{sender}: {message}";
+        }
+
+        private static string GetLeftResponse(string sender)
+        {
+            return $"{sender} left the room";
+        }
+
+        private string GetJoinResponse(TcpClient client, Room room, string sender)
+        {
+            string response;
+            if (!_chatRoomService.IsDuplicateUser(sender))
+            {
+                _chatRoomService.JoinToRoom(client, sender, room);
+                response = $"{sender} join to room";
+            }
+            else
+            {
+                response = $"DuplicateUser";
+            }
+
+            return response;
+        }
+
+        private static string GetSenderByRequest(string request, string[] splittedMessage)
+        {
+            if (IsJoinOrLeftRequest(request))
+            {
+                return splittedMessage[1];
+            }
+            return splittedMessage[1].Split(':')[1];
+        }
+
+        private string[] GetSplittedMessageByRequest(string request)
+        {
+            if (IsJoinOrLeftRequest(request))
+            {
+                return GetSplittedMessage(request, ':');
+            }
+            return GetSplittedMessage(request, '|');
+        }
+
+        private static bool IsJoinOrLeftRequest(string request)
+        {
+            return request.Contains("left:") || request.Contains("join:");
+        }
+
+        private static string[] GetSplittedMessage(string request, char splitCharacter)
+        {
+            return request.Split(splitCharacter);
+        }
+
+        public void FlushStream(StreamWriter sw)
+        {
+            sw.Flush();
+        }
+
     }
 }

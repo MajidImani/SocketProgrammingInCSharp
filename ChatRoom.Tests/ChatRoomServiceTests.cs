@@ -32,6 +32,7 @@ namespace ChatRoom.Tests
             Chat.TcpSocketClients.Should().Contain(tcpClient);
             Chat.UserRooms.Should().Contain(new KeyValuePair<string, string>(username, room.Name));
             Chat.UserSockets.Should().Contain(new KeyValuePair<string, TcpClient>(username, tcpClient));
+            tcpClient.Client.Should().NotBe(null);
             ClearTestData();
         }
 
@@ -54,7 +55,6 @@ namespace ChatRoom.Tests
             TcpClient tcpClient = new TcpClient();
             var room = new Room(roomName);
             _chatRoomService.JoinToRoom(tcpClient, username, room);
-            tcpClient.Client.Should().NotBe(null);
             _chatRoomService.LeftTheRoom(tcpClient, username, room);
             Chat.RoomUsers.Should().NotContain(username);
             Chat.TcpSocketClients.Should().NotContain(tcpClient);

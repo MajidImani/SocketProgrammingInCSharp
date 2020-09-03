@@ -1,7 +1,6 @@
 ﻿using ChatRoom.Contracts.Model;
 using ChatRoom.Contracts.Service;
 using System.Net.Sockets;
-using System;
 using System.IO;
 using System.Linq;
 
